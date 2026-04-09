@@ -1,0 +1,248 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum EvidenceType {
+  SCREENSHOT
+  FILE
+  TRANSCRIPT
+  LINK
+  NOTE
+  PAYMENT_DETAIL
+  DIAGNOSTIC_SESSION
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  EXPORT
+  LOGIN
+  LOGOUT
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  passwordHash   String
+  name           String?
+  role           String    @default("ADMIN")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  auditLogs      AuditLog[]
+  reportExports  ReportExport[]
+}
+
+model Case {
+  id            String            @id @default(cuid())
+  title         String
+  description   String?
+  platform      String?
+  riskLevel     RiskLevel         @default(MEDIUM)
+  status        String            @default("OPEN")
+  tags          String[]          @default([])
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  suspectProfiles  SuspectProfile[]
+  evidenceItems    EvidenceItem[]
+  messageEntries   MessageEntry[]
+  paymentDetails   PaymentDetail[]
+  diagnosticLinks  CaseDiagnosticSession[]
+  timelineEvents   TimelineEvent[]
+  reportExports    ReportExport[]
+}
+
+model SuspectProfile {
+  id          String   @id @default(cuid())
+  caseId      String
+  platform    String
+  profileUrl  String
+  handle      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model EvidenceItem {
+  id            String       @id @default(cuid())
+  caseId        String
+  type          EvidenceType
+  title         String
+  description   String?
+  tags          String[]     @default([])
+
+  // For uploaded files/screenshots
+  fileName      String?
+  fileMime      String?
+  fileSize      Int?
+  storageKey    String?      @unique
+
+  // For external links
+  url           String?
+
+  // For note/transcript snippets
+  textContent   String?
+
+  occurredAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  case          Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([type])
+}
+
+model MessageEntry {
+  id          String   @id @default(cuid())
+  caseId      String
+  source      String?  // e.g. "WhatsApp export"
+  speaker     String?  // e.g. "Victim" / "Suspect"
+  content     String
+  occurredAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model PaymentDetail {
+  id              String   @id @default(cuid())
+  caseId          String
+  iban            String?
+  bankName        String?
+  accountHolder   String?
+  cryptoWallet    String?
+  email           String?
+  phoneNumber     String?
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  case            Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model DiagnosticSession {
+  id                 String   @id @default(cuid())
+  token              String   @unique
+  status             String   @default("PENDING") // PENDING | ACCEPTED | DECLINED
+  consentedAt        DateTime?
+  declinedAt         DateTime?
+
+  // Transparent, consent-based diagnostics (approximate only unless separately consented)
+  ipAddress          String?
+  ipCountry          String?
+  ipRegion           String?
+  ipCity             String?
+  isp                String?
+
+  userAgent          String?
+  referrer           String?
+  browserName        String?
+  browserVersion     String?
+  osName             String?
+  osVersion          String?
+  deviceType         String?
+  platform           String?
+  language           String?
+  timezone           String?
+  screenWidth        Int?
+  screenHeight       Int?
+  networkType        String?
+
+  preciseGeoAllowed  Boolean  @default(false)
+  preciseLatitude    Float?
+  preciseLongitude   Float?
+  preciseGeoAt       DateTime?
+
+  cameraTestAllowed  Boolean  @default(false)
+  cameraTestPassed   Boolean?
+  micTestAllowed     Boolean  @default(false)
+  micTestPassed      Boolean?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  caseLinks          CaseDiagnosticSession[]
+}
+
+model CaseDiagnosticSession {
+  id                 String            @id @default(cuid())
+  caseId             String
+  diagnosticSessionId String
+  linkedAt           DateTime          @default(now())
+
+  case               Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  diagnosticSession  DiagnosticSession @relation(fields: [diagnosticSessionId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, diagnosticSessionId])
+  @@index([caseId])
+  @@index([diagnosticSessionId])
+}
+
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  caseId      String
+  title       String
+  description String?
+  occurredAt  DateTime
+  createdAt   DateTime @default(now())
+
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([occurredAt])
+}
+
+model ReportExport {
+  id            String   @id @default(cuid())
+  caseId        String
+  exportedById  String?
+  fileName      String
+  storageKey    String   @unique
+  createdAt     DateTime @default(now())
+
+  case          Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  exportedBy    User?    @relation(fields: [exportedById], references: [id], onDelete: SetNull)
+
+  @@index([caseId])
+  @@index([exportedById])
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  action      AuditAction
+  entityType  String
+  entityId    String?
+  message     String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
+
