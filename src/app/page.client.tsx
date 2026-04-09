@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TapFlappy } from "@/components/TapFlappy";
 
 type Phase = "intro" | "saving" | "done" | "declined";
 
@@ -142,8 +143,12 @@ export default function TapLoopHome() {
         )}
 
         {phase === "done" && (
-          <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 px-6 py-10 text-center">
-            <p className="text-base font-medium text-zinc-100">Done. Session saved.</p>
+          <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 shadow-xl backdrop-blur-sm px-5 py-6 sm:px-6 sm:py-8">
+            <h2 className="text-center text-lg font-semibold tracking-tight text-white">
+              TapLoop
+            </h2>
+            <p className="mt-1 text-center text-xs text-zinc-500">Session saved</p>
+            <TapFlappy />
           </div>
         )}
 

@@ -4,7 +4,7 @@ Minimal **consent-based** session log. **Supabase Postgres** is the primary stor
 
 ## Routes
 
-- **`/`** — TapLoop home (tap **Start** to consent and save)
+- **`/`** — TapLoop home (tap **Start** to consent, save session, then play a short tap-to-jump mini game)
 - **`POST /api/log`** — append one session row (after consent)
 - **`/results?key=OWNER_KEY`** — private list (newest first)
 - **`GET /api/export?key=OWNER_KEY`** — JSON download (`taploop-sessions.json`)
@@ -44,13 +44,14 @@ npm run dev
 | `OWNER_KEY` | Yes |
 | `SUPABASE_URL` | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes |
-| `IP_GEO_PROVIDER` | No (`ipapi` or omit) |
 
 `SUPABASE_ANON_KEY` is **not required** for this codebase.
 
+Geo lookups use **[ipapi.co](https://ipapi.co)** server-side (`/json/` per visitor IP). Failed or rate-limited responses are stored as **`unknown`** (never null) so the app keeps running.
+
 ## Data stored (only after **Start**)
 
-IP, approximate location / org if `IP_GEO_PROVIDER` is set, browser, OS, device type, language, timezone, screen size, user agent, referrer, network type when available, timestamp.
+IP, approximate location / org (or `unknown`), browser, OS, device type, language, timezone, screen size, user agent, referrer, network type when available, timestamp.
 
 ## Blueprint
 

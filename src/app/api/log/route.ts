@@ -35,23 +35,23 @@ export async function POST(req: NextRequest) {
     }
 
     const lookup =
-      ip !== "unknown"
-        ? await ipLookup(ip).catch(() => ({
-            country: null,
-            region: null,
-            city: null,
-            org: null,
-          }))
-        : { country: null, region: null, city: null, org: null };
+      ip === "unknown"
+        ? {
+            country: "unknown",
+            region: "unknown",
+            city: "unknown",
+            org: "unknown",
+          }
+        : await ipLookup(ip);
 
     const entry: VisitEntry = {
       ts: new Date().toISOString(),
       ip,
       ipGeo: {
-        country: lookup.country ?? null,
-        region: lookup.region ?? null,
-        city: lookup.city ?? null,
-        org: lookup.org ?? null,
+        country: lookup.country,
+        region: lookup.region,
+        city: lookup.city,
+        org: lookup.org,
       },
       client: body.client,
     };

@@ -5,10 +5,10 @@ export type VisitEntry = {
   ts: string;
   ip: string;
   ipGeo: {
-    country: string | null;
-    region: string | null;
-    city: string | null;
-    org: string | null;
+    country: string;
+    region: string;
+    city: string;
+    org: string;
   };
   client: {
     userAgent: string | null;
@@ -46,16 +46,20 @@ export type VisitRow = {
   platform: string | null;
 };
 
+function nz(s: string | null): string {
+  return s && s.trim() ? s.trim() : "unknown";
+}
+
 export function rowToEntry(r: VisitRow): VisitEntry {
   return {
     id: r.id,
     ts: new Date(r.client_ts).toISOString(),
     ip: r.ip,
     ipGeo: {
-      country: r.country,
-      region: r.region,
-      city: r.city,
-      org: r.org,
+      country: nz(r.country),
+      region: nz(r.region),
+      city: nz(r.city),
+      org: nz(r.org),
     },
     client: {
       userAgent: r.user_agent,
