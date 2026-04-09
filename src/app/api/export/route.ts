@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   return new NextResponse(JSON.stringify(entries, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Content-Disposition": "attachment; filename=\"visits.json\"",
+      "Content-Disposition": "attachment; filename=\"taploop-sessions.json\"",
       "Cache-Control": "no-store",
     },
   });

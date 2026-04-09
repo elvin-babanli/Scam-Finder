@@ -5,7 +5,7 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const isDev = process.env.NODE_ENV !== "production";
 
-  // Security headers (no third-party tracking scripts required)
+  // Security headers (no third-party scripts)
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
