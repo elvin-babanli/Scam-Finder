@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { TapFlappy } from "@/components/TapFlappy";
 
-type Phase = "intro" | "saving" | "done" | "declined";
+type Phase = "intro" | "saving" | "done";
 
 function parseBrowser(ua: string): string | null {
   const m =
@@ -34,7 +34,7 @@ function deviceType(ua: string): string {
 
 export default function TapLoopHome() {
   const [phase, setPhase] = useState<Phase>("intro");
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState(false);
   const [client, setClient] = useState<{
     userAgent: string | null;
     referrer: string | null;
@@ -70,7 +70,7 @@ export default function TapLoopHome() {
 
   async function onStart() {
     if (!client) return;
-    setSaveError(null);
+    setSaveError(false);
     setPhase("saving");
     try {
       const res = await fetch("/api/log", {
@@ -79,85 +79,52 @@ export default function TapLoopHome() {
         body: JSON.stringify({ consent: true, client }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json?.error ?? "Something went wrong");
+      if (!res.ok) throw new Error(json?.error ?? "no");
       setPhase("done");
     } catch {
       setPhase("intro");
-      setSaveError("Couldn’t save. Please try again.");
+      setSaveError(true);
     }
   }
 
-  function onNotNow() {
-    setPhase("declined");
-  }
-
   return (
-    <div className="min-h-dvh bg-zinc-950 text-zinc-50 flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="w-full max-w-xs">
-        {phase === "intro" && (
-          <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 shadow-xl backdrop-blur-sm px-5 py-8 sm:px-6 sm:py-9">
-            <h1 className="text-center text-2xl font-semibold tracking-tight text-white">
-              TapLoop
-            </h1>
-            <p className="mt-1 text-center text-sm font-medium text-zinc-400">
-              Quick session check
-            </p>
-            <p className="mt-5 text-center text-base leading-relaxed text-zinc-300">
-              Continue to start a short session check on this device.
-            </p>
-            <p className="mt-4 text-center text-xs leading-relaxed text-zinc-500">
-              If you continue, limited technical session details may be saved,
-              such as IP, browser, device type, language, timezone, screen size,
-              and visit time.
-            </p>
-
-            {saveError ? (
-              <p className="mt-4 text-center text-xs text-amber-200/90">{saveError}</p>
-            ) : null}
-
-            <div className="mt-8 flex flex-col gap-2.5">
-              <button
-                type="button"
-                onClick={onStart}
-                disabled={!client}
-                className="h-12 w-full rounded-xl bg-white text-zinc-950 text-base font-semibold shadow-sm transition-transform hover:bg-zinc-100 active:scale-98 disabled:opacity-40 disabled:active:scale-100"
-              >
-                Start
-              </button>
-              <button
-                type="button"
-                onClick={onNotNow}
-                className="h-11 w-full rounded-xl bg-transparent text-zinc-400 text-sm font-medium ring-1 ring-zinc-700 transition hover:bg-zinc-800/50 hover:text-zinc-300"
-              >
-                Not now
-              </button>
+    <>
+      <div className="min-h-dvh bg-gradient-to-b from-pink-200 via-rose-100 to-pink-50 text-zinc-800 flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="w-full max-w-xs">
+          {phase === "intro" && (
+            <div className="rounded-[2rem] bg-white/85 shadow-xl shadow-pink-200/50 ring-1 ring-pink-200/60 backdrop-blur-md px-8 py-10">
+              <h1 className="text-center text-3xl font-bold tracking-tight bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 bg-clip-text text-transparent">
+                TapLoop
+              </h1>
+              {saveError ? (
+                <p className="mt-4 text-center text-sm text-rose-600">Please try again.</p>
+              ) : null}
+              <div className="mt-10">
+                <button
+                  type="button"
+                  onClick={onStart}
+                  disabled={!client}
+                  className="h-14 w-full rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-base font-bold text-white shadow-lg shadow-pink-400/40 transition-transform hover:brightness-105 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+                >
+                  Start
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {phase === "saving" && (
-          <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 px-6 py-12 text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-zinc-600 border-t-white" />
-            <p className="mt-4 text-sm text-zinc-400">Saving…</p>
-          </div>
-        )}
-
-        {phase === "done" && (
-          <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 shadow-xl backdrop-blur-sm px-5 py-6 sm:px-6 sm:py-8">
-            <h2 className="text-center text-lg font-semibold tracking-tight text-white">
-              TapLoop
-            </h2>
-            <p className="mt-1 text-center text-xs text-zinc-500">Session saved</p>
-            <TapFlappy />
-          </div>
-        )}
-
-        {phase === "declined" && (
-          <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 px-6 py-10 text-center">
-            <p className="text-base text-zinc-400">Okay. You can close this page.</p>
-          </div>
-        )}
+          {phase === "saving" && (
+            <div className="rounded-[2rem] bg-white/85 shadow-xl shadow-pink-200/50 ring-1 ring-pink-200/60 px-8 py-14 flex flex-col items-center gap-4">
+              <div className="flex gap-2">
+                <span className="h-3 w-3 animate-bounce rounded-full bg-pink-400 [animation-delay:-0.2s]" />
+                <span className="h-3 w-3 animate-bounce rounded-full bg-rose-400 [animation-delay:-0.1s]" />
+                <span className="h-3 w-3 animate-bounce rounded-full bg-fuchsia-400" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {phase === "done" ? <TapFlappy /> : null}
+    </>
   );
 }
