@@ -1,21 +1,16 @@
-import path from "path";
 import fs from "fs/promises";
+import path from "path";
 
-export function storageRoot() {
+export function storageDir() {
   return process.env.STORAGE_DIR
     ? path.resolve(process.env.STORAGE_DIR)
     : path.resolve(process.cwd(), "data");
 }
 
-export async function ensureDir(p: string) {
-  await fs.mkdir(p, { recursive: true });
+export function visitsPath() {
+  return path.join(storageDir(), "visits.jsonl");
 }
 
-export function exportsDir() {
-  return path.join(storageRoot(), "exports");
+export async function ensureStorage() {
+  await fs.mkdir(storageDir(), { recursive: true });
 }
-
-export function uploadsDir() {
-  return path.join(storageRoot(), "uploads");
-}
-

@@ -1,23 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
-
-const ADMIN_MATCHERS = [
-  "/dashboard",
-  "/cases",
-  "/reports",
-  "/settings",
-  "/api/admin",
-  "/api/reports",
-  "/api/uploads",
-];
-
-function isAdminPath(pathname: string) {
-  return ADMIN_MATCHERS.some((p) => pathname === p || pathname.startsWith(p + "/"));
-}
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
+  const isDev = process.env.NODE_ENV !== "production";
 
   // Security headers (no third-party tracking scripts required)
   res.headers.set("X-Content-Type-Options", "nosniff");
@@ -36,21 +22,17 @@ export async function middleware(req: NextRequest) {
       "frame-ancestors 'none'",
       "img-src 'self' blob: data:",
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline'",
+      // Next/React dev tooling requires eval() for source-mapped stack traces.
+      // Keep this dev-only; production remains strict.
+      isDev
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+        : "script-src 'self' 'unsafe-inline'",
       "connect-src 'self'",
       "font-src 'self'",
     ].join("; "),
   );
 
-  if (!isAdminPath(req.nextUrl.pathname)) return res;
-
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (token) return res;
-
-  const loginUrl = req.nextUrl.clone();
-  loginUrl.pathname = "/login";
-  loginUrl.searchParams.set("from", req.nextUrl.pathname);
-  return NextResponse.redirect(loginUrl);
+  return res;
 }
 
 export const config = {

@@ -1,129 +1,64 @@
-# Scam Finder
+# Scam Finder (Minimal)
 
-Production-minded, **consent-based** scam investigation dashboard + public diagnostic page.
+Minimal **consent-based** visit logger, built to be simple and Render-friendly.
 
-## What this app does
+## Routes
 
-- **Admin dashboard (single-admin)**:
-  - Create/edit/delete cases
-  - Add suspected profiles (URL + platform)
-  - Add timeline events
-  - Save transcript entries (manual)
-  - Save suspicious payment/account details (manual)
-  - Add evidence notes/links + **upload screenshots/files**
-  - Link accepted public diagnostic sessions to a case
-  - Export a professional **PDF report per case**
-  - View an **audit log** of admin actions
+- **`/`**: public page with clear consent prompt
+- **`/api/log`**: stores a visit entry **only after consent**
+- **`/results?key=OWNER_KEY`**: private results table (no login, just a secret key)
+- **`/api/export?key=OWNER_KEY`**: download JSON export of stored entries
 
-- **Public diagnostic page** (`/public/diagnostic/[token]`):
-  - Shows clear consent screen
-  - **Stores nothing until the visitor clicks Accept**
-  - After acceptance stores: IP, approximate IP geo (if available), ISP/org (if available), browser/OS/device basics, language/timezone/screen, UA/referrer/platform/network type, timestamp
-  - Optional separate opt-ins (disabled by default): **precise geolocation**, **camera test**, **microphone test**
+## What data is stored (after consent)
 
-## Safety & privacy (important)
+- IP address (from request headers)
+- Approximate IP geolocation (country/region/city + org/ISP if available, via optional provider)
+- Browser / OS / device type
+- Language, timezone, screen size
+- User agent, referrer, network type (if available)
+- Timestamp
 
-- No spyware, no hidden tracking, no fingerprinting, no credential capture.
-- Public diagnostics are **explicit-consent only**.
-- Optional permissions (geo/camera/mic) are **separate opt-in** and only requested after acceptance.
-- No third-party scripts on the frontend.
+Nothing is stored if the visitor declines or closes the page.
 
-## Tech stack
+## Storage
 
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- Prisma
-- PostgreSQL
-- NextAuth (Credentials provider)
-- PDFKit (server-side PDF export)
+Entries are appended as JSON lines to:
 
-## Local setup
+- **`${STORAGE_DIR}/visits.jsonl`** (default: `./data/visits.jsonl`)
 
-### 1) Install dependencies
+## Local development
 
 ```bash
 npm install
+cp .env.example .env
+npm run dev
 ```
 
-### 2) Create `.env`
+Open `http://localhost:3000`.
 
-Copy `.env.example` to `.env` and fill in values.
+## Environment variables
 
-Required env vars:
+Required:
 
-- `DATABASE_URL`
-- `NEXTAUTH_URL`
-- `NEXTAUTH_SECRET`
-- `ADMIN_EMAIL`
-- `ADMIN_PASSWORD`
-- `NEXT_PUBLIC_APP_URL`
+- `OWNER_KEY` (secret key to access `/results` and `/api/export`)
 
 Optional:
 
 - `STORAGE_DIR` (default `./data`)
-- `IP_GEO_PROVIDER=ipapi` (only used after visitor acceptance)
+- `IP_GEO_PROVIDER=ipapi` (only runs after consent; uses `ipapi.co`)
 
-### 3) Run migrations
+## Render deployment (no Docker)
 
-```bash
-npm run prisma:deploy
-```
+- Build command: `npm ci && npm run build`
+- Start command: `npm start`
+- Set env vars: `OWNER_KEY` (required), optionally `STORAGE_DIR`, `IP_GEO_PROVIDER`
 
-Or during development:
+### Important note about persistence on Render
 
-```bash
-npm run prisma:migrate
-```
+Render web services can have **ephemeral disk** depending on configuration. If you need logs to persist:
 
-### 4) Seed demo data (creates/updates the admin user)
-
-```bash
-npm run seed
-```
-
-### 5) Start dev server
-
-```bash
-npm run dev
-```
-
-Visit:
-
-- Home: `http://localhost:3000`
-- Admin login: `http://localhost:3000/login`
-
-## Build
-
-```bash
-npm run build
-npm start
-```
-
-## Render deployment
-
-### Option A: Blueprint (`render.yaml`)
-
-1. Push this repo to GitHub.
-2. In Render: **New → Blueprint** and select the repo.
-3. Create a Render Postgres database and set `DATABASE_URL` (Render provides it).
-4. Set env vars:
-   - `NEXTAUTH_URL` (your Render URL)
-   - `NEXTAUTH_SECRET`
-   - `NEXT_PUBLIC_APP_URL` (same as `NEXTAUTH_URL`)
-5. Deploy. Render will run:
-   - Build: `npm ci && npm run prisma:generate && npm run build`
-   - Start: `npm run prisma:deploy && npm start`
-
-### Option B: Manual Web Service
-
-- Build Command: `npm ci && npm run prisma:generate && npm run build`
-- Start Command: `npm run prisma:deploy && npm start`
-
-## Notes on storage
-
-Uploads and PDF exports are written to `STORAGE_DIR` (default `./data`).
-For production durability on Render, configure a persistent disk or move storage to an object store (S3, etc.).
+- attach a **Render persistent disk**, and set `STORAGE_DIR` to the mounted path
+  - example: `/var/data`
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
