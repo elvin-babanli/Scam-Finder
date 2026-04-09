@@ -91,7 +91,7 @@ export default function TapLoopHome() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-zinc-950 text-zinc-50 flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="min-h-dvh bg-zinc-950 text-zinc-50 flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="w-full max-w-[min(100%,20rem)]">
         {phase === "intro" && (
           <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 shadow-xl backdrop-blur-sm px-5 py-8 sm:px-6 sm:py-9">

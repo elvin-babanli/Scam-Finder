@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 function unauthorized() {
   return (
-    <div className="min-h-[100dvh] bg-zinc-950 text-zinc-50 flex items-center justify-center px-4 py-10">
+    <div className="min-h-dvh bg-zinc-950 text-zinc-50 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm rounded-2xl ring-1 ring-zinc-800 bg-zinc-900/40 p-6 text-center">
         <div className="text-sm font-semibold text-zinc-200">TapLoop</div>
         <div className="mt-2 text-xs text-zinc-500">
@@ -24,7 +24,7 @@ function CardRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 border-b border-zinc-800/80 py-2.5 last:border-0">
       <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">{label}</span>
-      <span className="break-words text-sm text-zinc-200">{value || "—"}</span>
+      <span className="wrap-break-word text-sm text-zinc-200">{value || "—"}</span>
     </div>
   );
 }
@@ -77,7 +77,7 @@ export default async function ResultsPage({
   const entries = await listVisits(500);
 
   return (
-    <div className="min-h-[100dvh] bg-zinc-950 text-zinc-50">
+    <div className="min-h-dvh bg-zinc-950 text-zinc-50">
       <div className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-6 md:px-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -114,7 +114,7 @@ export default async function ResultsPage({
         </div>
 
         <div className="mt-5 hidden md:block overflow-x-auto rounded-2xl border border-zinc-800/80">
-          <table className="w-full min-w-[56rem] text-sm">
+          <table className="w-full min-w-4xl text-sm">
             <thead>
               <tr className="border-b border-zinc-800 bg-zinc-900/40 text-left text-xs text-zinc-500">
                 <th className="px-3 py-2.5 font-medium">Time</th>
@@ -147,11 +147,11 @@ export default async function ResultsPage({
                     <td className="px-3 py-2 text-xs">
                       {[e.ipGeo.country, e.ipGeo.region, e.ipGeo.city].filter(Boolean).join(", ") || "—"}
                     </td>
-                    <td className="max-w-[8rem] truncate px-3 py-2 text-xs">{e.ipGeo.org ?? "—"}</td>
+                    <td className="max-w-32 truncate px-3 py-2 text-xs">{e.ipGeo.org ?? "—"}</td>
                     <td className="px-3 py-2 text-xs">{e.client.browser ?? "—"}</td>
                     <td className="px-3 py-2 text-xs">{e.client.os ?? "—"}</td>
                     <td className="px-3 py-2 text-xs">{e.client.deviceType ?? "—"}</td>
-                    <td className="max-w-[10rem] px-3 py-2 text-xs">
+                    <td className="max-w-40 px-3 py-2 text-xs">
                       {[e.client.language, e.client.timezone].filter(Boolean).join(" · ") || "—"}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 text-xs">
@@ -159,7 +159,7 @@ export default async function ResultsPage({
                         ? `${e.client.screenWidth}×${e.client.screenHeight}`
                         : "—"}
                     </td>
-                    <td className="max-w-[12rem] break-all px-3 py-2 text-xs text-zinc-400">
+                    <td className="max-w-48 wrap-anywhere px-3 py-2 text-xs text-zinc-400">
                       {e.client.referrer ?? "—"}
                     </td>
                   </tr>

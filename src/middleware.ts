@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
+export async function middleware() {
   const res = NextResponse.next();
   const isDev = process.env.NODE_ENV !== "production";
 
