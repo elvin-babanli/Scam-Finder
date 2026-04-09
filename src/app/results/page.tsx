@@ -12,7 +12,7 @@ function unauthorized() {
       <div className="w-full max-w-sm rounded-2xl ring-1 ring-zinc-800 bg-zinc-900/40 p-6 text-center">
         <div className="text-sm font-semibold text-zinc-200">TapLoop</div>
         <div className="mt-2 text-xs text-zinc-500">
-          Private area. Add <code className="rounded bg-zinc-800 px-1 py-0.5 text-[10px]">?key=</code>{" "}
+          Private area. Add <code className="rounded bg-zinc-800 px-1 py-0.5 text-2xs">?key=</code>{" "}
           with your owner key.
         </div>
       </div>
@@ -23,7 +23,7 @@ function unauthorized() {
 function CardRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 border-b border-zinc-800/80 py-2.5 last:border-0">
-      <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">{label}</span>
+      <span className="text-2xs font-medium uppercase tracking-wide text-zinc-500">{label}</span>
       <span className="wrap-break-word text-sm text-zinc-200">{value || "—"}</span>
     </div>
   );
@@ -32,7 +32,7 @@ function CardRow({ label, value }: { label: string; value: string }) {
 function SessionCard({ e }: { e: VisitEntry }) {
   return (
     <article className="rounded-2xl border border-zinc-800/80 bg-zinc-900/25 p-4">
-      <div className="text-[11px] font-medium text-zinc-500">{e.ts}</div>
+      <div className="text-tight-xs font-medium text-zinc-500">{e.ts}</div>
       <div className="mt-3 space-y-0">
         <CardRow label="IP" value={e.ip} />
         <CardRow
@@ -96,7 +96,7 @@ export default async function ResultsPage({
           </Link>
         </header>
 
-        <p className="mt-3 text-[10px] leading-relaxed text-zinc-600">
+        <p className="mt-3 text-2xs leading-relaxed text-zinc-600">
           Owner link:{" "}
           <span className="font-mono text-zinc-500">
             {proto}://{host}/results?key=…

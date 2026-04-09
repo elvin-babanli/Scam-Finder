@@ -89,11 +89,11 @@ export default function TapLoopHome() {
 
   return (
     <>
-      <div className="min-h-dvh bg-gradient-to-b from-pink-200 via-rose-100 to-pink-50 text-zinc-800 flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="min-h-dvh bg-linear-to-b from-pink-200 via-rose-100 to-pink-50 text-zinc-800 flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="w-full max-w-xs">
           {phase === "intro" && (
-            <div className="rounded-[2rem] bg-white/85 shadow-xl shadow-pink-200/50 ring-1 ring-pink-200/60 backdrop-blur-md px-8 py-10">
-              <h1 className="text-center text-3xl font-bold tracking-tight bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 bg-clip-text text-transparent">
+            <div className="rounded-4xl bg-white/85 shadow-xl shadow-pink-200/50 ring-1 ring-pink-200/60 backdrop-blur-md px-8 py-10">
+              <h1 className="text-center text-3xl font-bold tracking-tight bg-linear-to-r from-pink-500 via-rose-500 to-fuchsia-500 bg-clip-text text-transparent">
                 TapLoop
               </h1>
               {saveError ? (
@@ -104,7 +104,7 @@ export default function TapLoopHome() {
                   type="button"
                   onClick={onStart}
                   disabled={!client}
-                  className="h-14 w-full rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-base font-bold text-white shadow-lg shadow-pink-400/40 transition-transform hover:brightness-105 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
+                  className="h-14 w-full rounded-full bg-linear-to-r from-pink-500 to-rose-500 text-base font-bold text-white shadow-lg shadow-pink-400/40 transition-transform hover:brightness-105 active:scale-95 disabled:opacity-40 disabled:active:scale-100"
                 >
                   Start
                 </button>
@@ -113,7 +113,7 @@ export default function TapLoopHome() {
           )}
 
           {phase === "saving" && (
-            <div className="rounded-[2rem] bg-white/85 shadow-xl shadow-pink-200/50 ring-1 ring-pink-200/60 px-8 py-14 flex flex-col items-center gap-4">
+            <div className="rounded-4xl bg-white/85 shadow-xl shadow-pink-200/50 ring-1 ring-pink-200/60 px-8 py-14 flex flex-col items-center gap-4">
               <div className="flex gap-2">
                 <span className="h-3 w-3 animate-bounce rounded-full bg-pink-400 [animation-delay:-0.2s]" />
                 <span className="h-3 w-3 animate-bounce rounded-full bg-rose-400 [animation-delay:-0.1s]" />

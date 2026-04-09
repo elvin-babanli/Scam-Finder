@@ -145,13 +145,13 @@ function GameWelcome({ onPlay }: { onPlay: () => void }) {
       <h2 className="relative text-2xl font-extrabold tracking-tight text-pink-600">
         Ready to bounce?
       </h2>
-      <p className="relative mt-3 max-w-[260px] text-sm font-medium leading-relaxed text-pink-900/70">
+      <p className="relative mt-3 max-w-65 text-sm font-medium leading-relaxed text-pink-900/70">
         Tap the screen to float up. Dodge the candy pillars!
       </p>
       <button
         type="button"
         onClick={onPlay}
-        className="relative mt-10 h-14 min-w-[200px] rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 px-10 text-lg font-bold text-white shadow-xl shadow-pink-400/45 transition hover:brightness-105 active:scale-95"
+        className="relative mt-10 h-14 min-w-50 rounded-full bg-linear-to-r from-pink-500 via-rose-500 to-fuchsia-500 px-10 text-lg font-bold text-white shadow-xl shadow-pink-400/45 transition hover:brightness-105 active:scale-95"
       >
         Play
       </button>
@@ -326,11 +326,11 @@ function FlappyRun({ runKey, onRestart }: { runKey: number; onRestart: () => voi
           <span className="tabular-nums">{score}</span>
         </div>
       </div>
-      <div ref={wrapRef} className="relative min-h-0 flex-1 overflow-hidden rounded-[1.75rem] ring-[3px] ring-white/90 shadow-inner shadow-pink-200/80">
+      <div ref={wrapRef} className="relative min-h-0 flex-1 overflow-hidden rounded-4xl ring-3 ring-white/90 shadow-inner shadow-pink-200/80">
         <canvas ref={canvasRef} className="block h-full w-full cursor-pointer touch-none" />
         {gameOver ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-pink-950/35 p-4 supports-backdrop-filter:backdrop-blur-[2px]">
-            <div className="w-full max-w-[280px] rounded-3xl bg-white/95 p-6 text-center shadow-2xl shadow-pink-300/40 ring-2 ring-pink-200">
+          <div className="absolute inset-0 flex items-center justify-center bg-pink-950/35 p-4 supports-backdrop-filter:backdrop-blur-xs">
+            <div className="w-full max-w-70 rounded-3xl bg-white/95 p-6 text-center shadow-2xl shadow-pink-300/40 ring-2 ring-pink-200">
               <p className="text-4xl">🌟</p>
               <p className="mt-2 text-lg font-extrabold text-pink-600">Nice try!</p>
               <p className="mt-1 text-sm font-medium text-pink-900/60">
@@ -340,7 +340,7 @@ function FlappyRun({ runKey, onRestart }: { runKey: number; onRestart: () => voi
               <button
                 type="button"
                 onClick={onRestart}
-                className="mt-6 h-12 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 text-sm font-bold text-white shadow-lg shadow-pink-400/40 transition active:scale-95"
+                className="mt-6 h-12 w-full rounded-2xl bg-linear-to-r from-pink-500 to-rose-500 text-sm font-bold text-white shadow-lg shadow-pink-400/40 transition active:scale-95"
               >
                 Play again
               </button>
@@ -373,7 +373,7 @@ export function TapFlappy() {
   return (
     <div
       id="taploop-game-root"
-      className="fixed inset-0 z-[300] flex flex-col bg-gradient-to-b from-[#ffd6ec] via-[#fce7f3] to-[#ede9fe] pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
+      className="fixed inset-0 z-300 flex flex-col bg-linear-to-b from-pink-200 via-pink-100 to-violet-100 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
     >
       <header className="flex shrink-0 items-center justify-center px-4 pb-2 pt-2">
         <div className="rounded-full bg-white/70 px-4 py-1.5 text-xs font-bold tracking-wide text-pink-600 shadow-sm ring-1 ring-pink-200/80 backdrop-blur-sm">
