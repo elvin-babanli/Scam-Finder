@@ -29,8 +29,22 @@ npm run dev
 
 ## Render
 
-- **Build:** `npm install && npm run build` (or `npm ci && npm run build` for CI lockfile)
-- **Start:** `npm start`
-- **Env:** `OWNER_KEY` (required), optional `STORAGE_DIR`, `IP_GEO_PROVIDER`
+**Service name:** `taploop`
 
-Blueprint: see `render.yaml` (service name **`taploop`**).
+| Field | Value |
+|--------|--------|
+| **Build command** | `npm install && npm run build` |
+| **Start command** | `npm start` |
+
+**Environment variables**
+
+| Key | Required | Notes |
+|-----|----------|--------|
+| `OWNER_KEY` | **Yes** | Long random secret; unlocks `/results?key=…` and `/api/export?key=…` |
+| `STORAGE_DIR` | No | Use `/var/data` when a persistent disk is mounted there (see `render.yaml`) |
+| `IP_GEO_PROVIDER` | No | Set to `ipapi` for approximate IP location after consent, or omit to skip |
+
+**Blueprint:** `render.yaml` attaches a **1 GB disk** at **`/var/data`** and sets `STORAGE_DIR=/var/data`.  
+That needs a **paid** Render web instance (free tier may not support disks). If you deploy without a disk, set `STORAGE_DIR` to `./data` and accept ephemeral storage.
+
+**Native runtime:** Set environment to **Node** if you create the service manually.

@@ -1,17 +1,25 @@
+# TapLoop — Render Blueprint
+# https://render.com/docs/blueprint-spec
 services:
   - type: web
     name: taploop
-    env: node
+    runtime: node
     plan: starter
     buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /
+    # Persistent disk: required for logs across deploys (requires paid instance on Render).
+    numInstances: 1
+    disk:
+      name: taploop-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: OWNER_KEY
         sync: false
       - key: STORAGE_DIR
-        value: ./data
+        value: /var/data
       - key: IP_GEO_PROVIDER
         value: ipapi
