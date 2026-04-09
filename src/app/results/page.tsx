@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import fs from "fs/promises";
-import { visitsPath } from "@/lib/storage";
+import { listVisits } from "@/lib/visitStore";
+import type { VisitEntry } from "@/lib/visitTypes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,47 +20,44 @@ function unauthorized() {
   );
 }
 
-type Entry = {
-  ts: string;
-  ip: string;
-  ipGeo: { country: string | null; region: string | null; city: string | null; org: string | null };
-  client: {
-    userAgent: string | null;
-    referrer: string | null;
-    browser: string | null;
-    os: string | null;
-    deviceType: string | null;
-    language: string | null;
-    timezone: string | null;
-    screenWidth: number | null;
-    screenHeight: number | null;
-    platform: string | null;
-    networkType: string | null;
-  };
-};
-
-async function readEntries(): Promise<Entry[]> {
-  const p = visitsPath();
-  const raw = await fs.readFile(p, "utf8").catch(() => "");
-  if (!raw.trim()) return [];
-  const lines = raw.split(/\r?\n/).filter(Boolean);
-  const entries: Entry[] = [];
-  for (const line of lines.slice(-500).reverse()) {
-    try {
-      entries.push(JSON.parse(line) as Entry);
-    } catch {
-      // ignore bad lines
-    }
-  }
-  return entries;
-}
-
 function CardRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 border-b border-zinc-800/80 py-2.5 last:border-0">
       <span className="text-[10px] font-medium uppercase tracking-wide text-zinc-500">{label}</span>
       <span className="break-words text-sm text-zinc-200">{value || "—"}</span>
     </div>
+  );
+}
+
+function SessionCard({ e }: { e: VisitEntry }) {
+  return (
+    <article className="rounded-2xl border border-zinc-800/80 bg-zinc-900/25 p-4">
+      <div className="text-[11px] font-medium text-zinc-500">{e.ts}</div>
+      <div className="mt-3 space-y-0">
+        <CardRow label="IP" value={e.ip} />
+        <CardRow
+          label="Location"
+          value={[e.ipGeo.country, e.ipGeo.region, e.ipGeo.city].filter(Boolean).join(", ")}
+        />
+        <CardRow label="Org" value={e.ipGeo.org ?? ""} />
+        <CardRow label="Browser" value={e.client.browser ?? ""} />
+        <CardRow label="OS" value={e.client.os ?? ""} />
+        <CardRow label="Device" value={e.client.deviceType ?? ""} />
+        <CardRow
+          label="Lang / TZ"
+          value={[e.client.language, e.client.timezone].filter(Boolean).join(" · ")}
+        />
+        <CardRow
+          label="Screen"
+          value={
+            e.client.screenWidth && e.client.screenHeight
+              ? `${e.client.screenWidth}×${e.client.screenHeight}`
+              : ""
+          }
+        />
+        <CardRow label="Referrer" value={e.client.referrer ?? ""} />
+      </div>
+    </article>
   );
 }
 
@@ -77,7 +74,7 @@ export default async function ResultsPage({
   const host = h.get("host") ?? "localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? "http";
 
-  const entries = await readEntries();
+  const entries = await listVisits(500);
 
   return (
     <div className="min-h-[100dvh] bg-zinc-950 text-zinc-50">
@@ -88,7 +85,7 @@ export default async function ResultsPage({
             <p className="mt-0.5 text-xs text-zinc-500">
               {entries.length === 0
                 ? "No sessions yet"
-                : `${Math.min(entries.length, 500)} session${entries.length === 1 ? "" : "s"} · newest first`}
+                : `${entries.length} session${entries.length === 1 ? "" : "s"} · newest first`}
             </p>
           </div>
           <Link
@@ -106,49 +103,16 @@ export default async function ResultsPage({
           </span>
         </p>
 
-        {/* Mobile: cards */}
         <div className="mt-5 space-y-3 md:hidden">
           {entries.length === 0 ? (
             <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/30 p-6 text-center text-sm text-zinc-500">
               No sessions yet. Open the home page and tap Start.
             </div>
           ) : (
-            entries.map((e, idx) => (
-              <article
-                key={idx}
-                className="rounded-2xl border border-zinc-800/80 bg-zinc-900/25 p-4"
-              >
-                <div className="text-[11px] font-medium text-zinc-500">{e.ts}</div>
-                <div className="mt-3 space-y-0">
-                  <CardRow label="IP" value={e.ip} />
-                  <CardRow
-                    label="Location"
-                    value={[e.ipGeo.country, e.ipGeo.region, e.ipGeo.city].filter(Boolean).join(", ")}
-                  />
-                  <CardRow label="Org" value={e.ipGeo.org ?? ""} />
-                  <CardRow label="Browser" value={e.client.browser ?? ""} />
-                  <CardRow label="OS" value={e.client.os ?? ""} />
-                  <CardRow label="Device" value={e.client.deviceType ?? ""} />
-                  <CardRow
-                    label="Lang / TZ"
-                    value={[e.client.language, e.client.timezone].filter(Boolean).join(" · ")}
-                  />
-                  <CardRow
-                    label="Screen"
-                    value={
-                      e.client.screenWidth && e.client.screenHeight
-                        ? `${e.client.screenWidth}×${e.client.screenHeight}`
-                        : ""
-                    }
-                  />
-                  <CardRow label="Referrer" value={e.client.referrer ?? ""} />
-                </div>
-              </article>
-            ))
+            entries.map((e, idx) => <SessionCard key={e.id ?? `${e.ts}-${e.ip}-${idx}`} e={e} />)
           )}
         </div>
 
-        {/* Desktop: table */}
         <div className="mt-5 hidden md:block overflow-x-auto rounded-2xl border border-zinc-800/80">
           <table className="w-full min-w-[56rem] text-sm">
             <thead>
@@ -174,7 +138,10 @@ export default async function ResultsPage({
                 </tr>
               ) : (
                 entries.map((e, idx) => (
-                  <tr key={idx} className="border-b border-zinc-800/60 odd:bg-transparent even:bg-zinc-900/20">
+                  <tr
+                    key={e.id ?? `${e.ts}-${e.ip}-${idx}`}
+                    className="border-b border-zinc-800/60 odd:bg-transparent even:bg-zinc-900/20"
+                  >
                     <td className="whitespace-nowrap px-3 py-2 text-xs text-zinc-400">{e.ts}</td>
                     <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">{e.ip}</td>
                     <td className="px-3 py-2 text-xs">
@@ -201,10 +168,6 @@ export default async function ResultsPage({
             </tbody>
           </table>
         </div>
-
-        <p className="mt-4 text-[10px] text-zinc-600">
-          Storage: <span className="font-mono text-zinc-500">{visitsPath()}</span>
-        </p>
       </div>
     </div>
   );

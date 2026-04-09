@@ -1,25 +1,20 @@
-# TapLoop — Render Blueprint
-# https://render.com/docs/blueprint-spec
+# TapLoop — Render (free tier friendly: no disk; data in Supabase)
 services:
   - type: web
     name: taploop
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /
-    # Persistent disk: required for logs across deploys (requires paid instance on Render).
-    numInstances: 1
-    disk:
-      name: taploop-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: OWNER_KEY
         sync: false
-      - key: STORAGE_DIR
-        value: /var/data
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
       - key: IP_GEO_PROVIDER
         value: ipapi

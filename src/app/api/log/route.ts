@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { rateLimitOrThrow } from "@/lib/rateLimit";
-import { ensureStorage, visitsPath } from "@/lib/storage";
 import { getIpFromHeaders, ipLookup } from "@/lib/ip";
-import fs from "fs/promises";
+import { saveVisit } from "@/lib/visitStore";
+import type { VisitEntry } from "@/lib/visitTypes";
 
 export const runtime = "nodejs";
 
@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
             org: null,
           }))
         : { country: null, region: null, city: null, org: null };
-    const entry = {
+
+    const entry: VisitEntry = {
       ts: new Date().toISOString(),
       ip,
       ipGeo: {
@@ -55,8 +56,7 @@ export async function POST(req: NextRequest) {
       client: body.client,
     };
 
-    await ensureStorage();
-    await fs.appendFile(visitsPath(), JSON.stringify(entry) + "\n", "utf8");
+    await saveVisit(entry);
 
     return NextResponse.json({ ok: true });
   } catch (e) {
@@ -70,4 +70,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Server error." }, { status, headers });
   }
 }
-

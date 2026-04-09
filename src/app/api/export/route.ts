@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import fs from "fs/promises";
-import { visitsPath } from "@/lib/storage";
+import { listVisits } from "@/lib/visitStore";
 
 export const runtime = "nodejs";
 
@@ -12,19 +11,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const raw = await fs.readFile(visitsPath(), "utf8").catch(() => "");
-  const lines = raw.split(/\r?\n/).filter(Boolean);
-  const entries = lines
-    .map((l) => {
-      try {
-        return JSON.parse(l);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
+  const entries = await listVisits(10_000);
+  const forExport = entries.map((e) => {
+    const { id: _omit, ...rest } = e;
+    void _omit;
+    return rest;
+  });
 
-  return new NextResponse(JSON.stringify(entries, null, 2), {
+  return new NextResponse(JSON.stringify(forExport, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "Content-Disposition": "attachment; filename=\"taploop-sessions.json\"",
@@ -32,4 +26,3 @@ export async function GET(req: NextRequest) {
     },
   });
 }
-

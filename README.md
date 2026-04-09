@@ -1,50 +1,57 @@
 # TapLoop
 
-Minimal **consent-based** session log. Mobile-first public page + private owner view.
+Minimal **consent-based** session log. **Supabase Postgres** is the primary store (works on **Render free tier** without a disk). In-memory buffer is **fallback only** if Supabase is misconfigured or briefly unavailable.
 
 ## Routes
 
-- **`/`** — TapLoop home (explicit consent before any save)
-- **`POST /api/log`** — append one session row after consent
+- **`/`** — TapLoop home (tap **Start** to consent and save)
+- **`POST /api/log`** — append one session row (after consent)
 - **`/results?key=OWNER_KEY`** — private list (newest first)
-- **`GET /api/export?key=OWNER_KEY`** — download JSON (`taploop-sessions.json`)
+- **`GET /api/export?key=OWNER_KEY`** — JSON download (`taploop-sessions.json`)
 
-## Data stored (only after user taps **Start**)
+## Supabase setup
 
-IP, approximate IP location (if `IP_GEO_PROVIDER` set), browser, OS, device type, language, timezone, screen size, user agent, referrer, network type when available, timestamp.
+1. Create a project at [supabase.com](https://supabase.com).
+2. **SQL → New query** → paste and run the script in **`supabase/visits.sql`** (creates `public.visits` + index).
+3. **Project Settings → API**:
+   - Copy **Project URL** → `SUPABASE_URL`
+   - Copy **service_role** key → `SUPABASE_SERVICE_ROLE_KEY` (server-only; keep secret)
 
-## Storage
-
-- **`${STORAGE_DIR}/visits.jsonl`** (default `./data/visits.jsonl`)
-
-On Render, disk can be ephemeral: use a **persistent disk** and point `STORAGE_DIR` at the mount path if you need retention.
+Do **not** expose the service role key in the browser. This app only uses it in **server** routes and server components.
 
 ## Local
 
 ```bash
 npm install
 cp .env.example .env
+# fill OWNER_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 npm run dev
 ```
 
 ## Render
 
-**Service name:** `taploop`
-
-| Field | Value |
+| Setting | Value |
 |--------|--------|
+| **Name** | `taploop` |
 | **Build command** | `npm install && npm run build` |
 | **Start command** | `npm start` |
+| **Runtime** | Node |
 
-**Environment variables**
+**Environment variables** — set in the Render dashboard (or use Blueprint `render.yaml` and paste secrets when prompted):
 
-| Key | Required | Notes |
-|-----|----------|--------|
-| `OWNER_KEY` | **Yes** | Long random secret; unlocks `/results?key=…` and `/api/export?key=…` |
-| `STORAGE_DIR` | No | Use `/var/data` when a persistent disk is mounted there (see `render.yaml`) |
-| `IP_GEO_PROVIDER` | No | Set to `ipapi` for approximate IP location after consent, or omit to skip |
+| Key | Required |
+|-----|----------|
+| `OWNER_KEY` | Yes |
+| `SUPABASE_URL` | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes |
+| `IP_GEO_PROVIDER` | No (`ipapi` or omit) |
 
-**Blueprint:** `render.yaml` attaches a **1 GB disk** at **`/var/data`** and sets `STORAGE_DIR=/var/data`.  
-That needs a **paid** Render web instance (free tier may not support disks). If you deploy without a disk, set `STORAGE_DIR` to `./data` and accept ephemeral storage.
+`SUPABASE_ANON_KEY` is **not required** for this codebase.
 
-**Native runtime:** Set environment to **Node** if you create the service manually.
+## Data stored (only after **Start**)
+
+IP, approximate location / org if `IP_GEO_PROVIDER` is set, browser, OS, device type, language, timezone, screen size, user agent, referrer, network type when available, timestamp.
+
+## Blueprint
+
+`render.yaml` uses **`plan: free`** and **no persistent disk** — persistence is entirely in Supabase.

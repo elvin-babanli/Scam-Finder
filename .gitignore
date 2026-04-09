@@ -34,7 +34,7 @@ yarn-error.log*
 .env*
 !.env.example
 
-# local storage
+# optional local dev artifacts (not used in production)
 /data/
 
 # vercel
