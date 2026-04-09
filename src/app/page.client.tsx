@@ -92,7 +92,7 @@ export default function TapLoopHome() {
 
   return (
     <div className="min-h-dvh bg-zinc-950 text-zinc-50 flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="w-full max-w-[min(100%,20rem)]">
+      <div className="w-full max-w-xs">
         {phase === "intro" && (
           <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 shadow-xl backdrop-blur-sm px-5 py-8 sm:px-6 sm:py-9">
             <h1 className="text-center text-2xl font-semibold tracking-tight text-white">
@@ -101,7 +101,7 @@ export default function TapLoopHome() {
             <p className="mt-1 text-center text-sm font-medium text-zinc-400">
               Quick session check
             </p>
-            <p className="mt-5 text-center text-[15px] leading-relaxed text-zinc-300">
+            <p className="mt-5 text-center text-base leading-relaxed text-zinc-300">
               Continue to start a short session check on this device.
             </p>
             <p className="mt-4 text-center text-xs leading-relaxed text-zinc-500">
@@ -119,7 +119,7 @@ export default function TapLoopHome() {
                 type="button"
                 onClick={onStart}
                 disabled={!client}
-                className="h-12 w-full rounded-xl bg-white text-zinc-950 text-[15px] font-semibold shadow-sm transition hover:bg-zinc-100 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100"
+                className="h-12 w-full rounded-xl bg-white text-zinc-950 text-base font-semibold shadow-sm transition-transform hover:bg-zinc-100 active:scale-98 disabled:opacity-40 disabled:active:scale-100"
               >
                 Start
               </button>
@@ -143,13 +143,13 @@ export default function TapLoopHome() {
 
         {phase === "done" && (
           <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 px-6 py-10 text-center">
-            <p className="text-[15px] font-medium text-zinc-100">Done. Session saved.</p>
+            <p className="text-base font-medium text-zinc-100">Done. Session saved.</p>
           </div>
         )}
 
         {phase === "declined" && (
           <div className="rounded-2xl bg-zinc-900/80 ring-1 ring-zinc-800/80 px-6 py-10 text-center">
-            <p className="text-[15px] text-zinc-400">Okay. You can close this page.</p>
+            <p className="text-base text-zinc-400">Okay. You can close this page.</p>
           </div>
         )}
       </div>
